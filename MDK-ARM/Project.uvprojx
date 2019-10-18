@@ -390,22 +390,10 @@
         </Group>
         <Group>
           <GroupName>User Services</GroupName>
-          <Files>
-            <File>
-              <FileName>Chrono.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Services\Chrono.c</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>MyDrivers</GroupName>
           <Files>
-            <File>
-              <FileName>MyTimer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\MyDrivers\MyTimer.c</FilePath>
-            </File>
             <File>
               <FileName>stm32f1xx_ll_gpio.c</FileName>
               <FileType>1</FileType>
@@ -857,22 +845,10 @@
         </Group>
         <Group>
           <GroupName>User Services</GroupName>
-          <Files>
-            <File>
-              <FileName>Chrono.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Services\Chrono.c</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>MyDrivers</GroupName>
           <Files>
-            <File>
-              <FileName>MyTimer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\MyDrivers\MyTimer.c</FilePath>
-            </File>
             <File>
               <FileName>stm32f1xx_ll_gpio.c</FileName>
               <FileType>1</FileType>

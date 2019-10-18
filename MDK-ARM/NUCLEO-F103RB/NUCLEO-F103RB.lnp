@@ -1,7 +1,5 @@
 --cpu Cortex-M3
 "nucleo-f103rb\main.o"
-"nucleo-f103rb\chrono.o"
-"nucleo-f103rb\mytimer.o"
 "nucleo-f103rb\stm32f1xx_ll_gpio.o"
 "nucleo-f103rb\stm32f1xx_ll_rcc.o"
 "nucleo-f103rb\stm32f1xx_ll_utils.o"

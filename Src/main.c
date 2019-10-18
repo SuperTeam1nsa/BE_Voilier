@@ -20,15 +20,52 @@
 #include "stm32f1xx_ll_utils.h"   // utile dans la fonction SystemClock_Config
 #include "stm32f1xx_ll_system.h" // utile dans la fonction SystemClock_Config
 #include "stm32f1xx_ll_gpio.h" 
-#include "Chrono.h"
+//#include "Chrono.h"
 #include "stm32f1xx_ll_usart.h"
-
+#include "stm32f1xx_ll_tim.h" 
+#include "stm32f1xx_ll_bus.h" // Pour l'activation des horloges
 
 
 void  SystemClock_Config(void);
+void TIM3_IRQHandler(void)
+{
+	// rabaisser le flag d'IT
+	LL_TIM_ClearFlag_UPDATE(TIM3);
+	//(*Ptr_ItFct_TIM3)(); //update position
+}	
 
 /* Private functions ---------------------------------------------------------*/
+void config_gpio_girouette(void){
+	//active l'horloge gpioA
+	RCC->APB2ENR |= RCC_APB2ENR_IOPAEN ;
+	
+	//en floating input 
+	//PA5 en floating input (index)
+	LL_GPIO_SetPinMode(GPIOA,LL_GPIO_PIN_5,LL_GPIO_MODE_FLOATING);
+	
+	
+	///timer en mode incremental encode: 
+	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM3);
+	//active l'horloge
+	//TIM3->CR1=0x1;
+	LL_TIM_InitTypeDef My_LL_Tim_Init_Struct;
+	My_LL_Tim_Init_Struct.Autoreload=0xB4;//180
+	My_LL_Tim_Init_Struct.Prescaler=0x1;
+	My_LL_Tim_Init_Struct.ClockDivision=LL_TIM_CLOCKDIVISION_DIV1;
+	//LL_TIM_IC_Config
+	My_LL_Tim_Init_Struct.RepetitionCounter=0;
+	LL_TIM_Init(TIM3,&My_LL_Tim_Init_Struct);
+	//on compte que sur 1 seul edge p328
+	TIM3->SMCR=0x001;
+	//PA6 et pA7 => CH1 et CH2 TIM3 en input 
+	TIM3->CCMR1=0x0101;
+	//lance le compteur
+	LL_TIM_EnableCounter(TIM3);
+	
+}
 
+void config_servoile(void){
+}
 /**
   * @brief  Main program
   * @param  None
@@ -120,7 +157,7 @@ int main(void)
 
   // Add your application code here 
 
-
+config_gpio_girouette();
   
   /* Infinite loop */
   while (1)
@@ -143,9 +180,9 @@ int main(void)
 		
 
 	
-	}
+	};
 
-
+}
 
 
 
