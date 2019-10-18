@@ -146,6 +146,56 @@ void MyTimer_IT_Disable(TIM_TypeDef * Timer)
 			LL_TIM_DisableIT_UPDATE(Timer); 
 }	
 
+/**
+	* @brief Configure la télécommande
+	* @note Timer 4 à utiliser, Channel 1 et broche PB6	
+	* @param angle voulu : 0° == tout droit -90° == à gauche 90° == à droite 
+	*/
+
+void MyTimer_PWM_Command_Input(int angle) {
+// on clocke le Tim4
+	RCC->APB1ENR |= RCC_APB1ENR_TIM4EN ;
+	
+	//pwm ratio compris entre 1 et 2 ms. 
+	float pwm_ratio = 1.0 + (90 + angle%180)/180.0 ;   
+	int pwm_ticks = pwm_ratio 
+	int pwm_period = 20 ;
+	
+	//
+	TIM4->CCMR1 |= TIM4->CCMR1 | TIM_CCMR1_CC1S_0 ;
+	TIM4->CCMR1 &= TIM4->CCMR1 | ~TIM_CCMR1_CC1S_1 ;
+	
+	//Select the active polarity for TI1FP1
+	TIM4->CCER &= TIM4->CCER | ~TIM_CCER_CC1P;
+	
+	//Select the active input for TIMx_CCR2
+	TIM4->CCMR1 &= TIM4->CCMR1 | ~TIM_CCMR1_CC2S_0;
+	TIM4->CCMR1 |= TIM4->CCMR1 | TIM_CCMR1_CC2S_1;
+	
+	//Select the active polarity for TI1FP2
+	TIM4->CCER |= TIM4->CCER | TIM_CCER_CC2P;
+
+	//Select the valid trigger input
+	TIM4->SMCR |= TIM4->SMCR | TIM_SMCR_TS_0;
+	TIM4->SMCR &= TIM4->SMCR | ~TIM_SMCR_TS_1;
+	TIM4->SMCR |= TIM4->SMCR | TIM_SMCR_TS_2;
+
+	//Configure the slave mode controller in reset mode
+	TIM4->SMCR &= TIM4->SMCR | ~TIM_SMCR_SMS_0;
+	TIM4->SMCR &= TIM4->SMCR | ~TIM_SMCR_SMS_1;
+	TIM4->SMCR |= TIM4->SMCR |  TIM_SMCR_SMS_2;
+
+	//Enable the captures
+	TIM4->CCER |= TIM4->CCER | TIM_CCER_CC1E;
+	TIM4->CCER |= TIM4->CCER | TIM_CCER_CC2E;
+
+	TIM4->CCR1 &= TIM4->CCR1 | ~TIM_CCR1_CCR1;
+	TIM4->CCR1 |= TIM4->CCR1 | (11000000 << TIM_CCR1_CCR1_Pos) ;; 
+	
+	TIM4->CCR2 &= TIM4->CCR2 | ~TIM_CCR2_CCR2;
+
+
+}
 
 /*
 ============ LES INTERRUPTIONS =================================

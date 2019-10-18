@@ -149,6 +149,7 @@ void configUSART(void ){
 //GPIO index
 int main(void)
 {
+	
 	//rq:add configUsart dans chrono.c et lève flag RXNE dans task10ms
 	//configUSART();
 
@@ -203,6 +204,7 @@ config_gpio_girouette();
   * @param  None
   * @retval None
   */
+}
 void SystemClock_Config(void)
 {
   /* Set FLASH latency */
