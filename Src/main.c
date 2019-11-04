@@ -21,23 +21,48 @@
 #include "stm32f1xx_ll_system.h" // utile dans la fonction SystemClock_Config
 #include "stm32f1xx_ll_gpio.h" 
 //#include "Chrono.h"
+#include "MyTimer.h"
 #include "stm32f1xx_ll_usart.h"
 #include "stm32f1xx_ll_tim.h" 
 #include "stm32f1xx_ll_bus.h" // Pour l'activation des horloges
 
-
+int angle=0;
 void  SystemClock_Config(void);
-void TIM3_IRQHandler(void)
+void update_position_girouette(void)
 {
 	// rabaisser le flag d'IT
 	LL_TIM_ClearFlag_UPDATE(TIM3);
+	//
 	//(*Ptr_ItFct_TIM3)(); //update position
 }	
 
 /* Private functions ---------------------------------------------------------*/
-void config_gpio_girouette(void){
+void config_gpio_girouette(void){ // on pense que ça marche mais c'est à tester car keil 5 ne permet plus de faire marcher le compteur en titillant les channels 1 et 2 de la simulation.
 	//active l'horloge gpioA
 	RCC->APB2ENR |= RCC_APB2ENR_IOPAEN ;
+	
+
+	//Depending on the sequence the counter counts up or down, the DIR bit in the TIMx_CR1 register is modified by hardware accordingly
+	//valeur de l'angle direcctement dasn TIM3->CNT cf :
+	//This means that the counter just counts continuously between 0 and the auto-reload value in the TIMx_ARR register (0 to ARR or ARR down to 0 depending on the direction)
+	MyTimer_Conf(TIM3,0xB4,0x1);//180
+	MyTimer_IT_Conf(TIM3, update_position_girouette,8);
+	MyTimer_IT_Enable(TIM3);
+		
+	//on compte que sur 1 seul edge p328
+	TIM3->SMCR=0x001;
+	//PA6 et pA7 => CH1 et CH2 TIM3 en input 
+	TIM3->CCMR1=0x0101;
+	//TIM3->
+	//lance le compteur
+	MyTimer_Start(TIM3);
+	/*
+	//active l'interruption 
+	//TIM3->DIER |= 1;
+	LL_TIM_EnableIT_UPDATE(TIM3);
+	
+	//set priorite
+	NVIC->ISER[0] = 0x01;
 	
 	//en floating input 
 	//PA5 en floating input (index)
@@ -55,16 +80,56 @@ void config_gpio_girouette(void){
 	//LL_TIM_IC_Config
 	My_LL_Tim_Init_Struct.RepetitionCounter=0;
 	LL_TIM_Init(TIM3,&My_LL_Tim_Init_Struct);
-	//on compte que sur 1 seul edge p328
-	TIM3->SMCR=0x001;
-	//PA6 et pA7 => CH1 et CH2 TIM3 en input 
-	TIM3->CCMR1=0x0101;
-	//lance le compteur
-	LL_TIM_EnableCounter(TIM3);
+	*/
+
 	
 }
 
+//a faire
+//TIM1 CH1 PA8
 void config_servoile(void){
+	
+	RCC->APB2ENR |= RCC_APB2ENR_TIM1EN ;
+	
+	//pwm ratio compris entre 1 et 2 ms. 
+	float pwm_ratio = 1.0 + (90 + angle%180)/180.0 ;   
+	int pwm_ticks = 20*720/75 ;//a reflechor car tres pas sur
+	int pwm_period = 20 ;
+	
+	//
+	TIM4->CCMR1 |= TIM4->CCMR1 | TIM_CCMR1_CC1S_0 ;
+	TIM4->CCMR1 &= TIM4->CCMR1 | ~TIM_CCMR1_CC1S_1 ;
+	
+	//Select the active polarity for TI1FP1
+	TIM4->CCER &= TIM4->CCER | ~TIM_CCER_CC1P;
+	
+	//Select the active input for TIMx_CCR2
+	TIM4->CCMR1 &= TIM4->CCMR1 | ~TIM_CCMR1_CC2S_0;
+	TIM4->CCMR1 |= TIM4->CCMR1 | TIM_CCMR1_CC2S_1;
+	
+	//Select the active polarity for TI1FP2
+	TIM4->CCER |= TIM4->CCER | TIM_CCER_CC2P;
+
+	//Select the valid trigger input
+	TIM4->SMCR |= TIM4->SMCR | TIM_SMCR_TS_0;
+	TIM4->SMCR &= TIM4->SMCR | ~TIM_SMCR_TS_1;
+	TIM4->SMCR |= TIM4->SMCR | TIM_SMCR_TS_2;
+
+	//Configure the slave mode controller in reset mode
+	TIM4->SMCR &= TIM4->SMCR | ~TIM_SMCR_SMS_0;
+	TIM4->SMCR &= TIM4->SMCR | ~TIM_SMCR_SMS_1;
+	TIM4->SMCR |= TIM4->SMCR |  TIM_SMCR_SMS_2;
+
+	//Enable the captures
+	TIM4->CCER |= TIM4->CCER | TIM_CCER_CC1E;
+	TIM4->CCER |= TIM4->CCER | TIM_CCER_CC2E;
+
+	TIM4->CCR1 &= TIM4->CCR1 | ~TIM_CCR1_CCR1;
+	TIM4->CCR1 |= TIM4->CCR1 | (11000000 << TIM_CCR1_CCR1_Pos) ;; 
+	
+	TIM4->CCR2 &= TIM4->CCR2 | ~TIM_CCR2_CCR2;
+
+
 }
 /**
   * @brief  Main program
@@ -111,7 +176,6 @@ void configUSART(void ){
 	//probleme link struct resolu en ajoutant le .c de ll_usart.h dans le projet.         A FAIRE
 	//																																										par fonctions: mauvais baud rate 
 	//																																										non enable
-	/*
   LL_USART_Enable(USART2);
 	LL_USART_EnableDirectionTx(USART2);
 	LL_USART_ConfigAsyncMode(USART2);
@@ -204,7 +268,6 @@ config_gpio_girouette();
   * @param  None
   * @retval None
   */
-}
 void SystemClock_Config(void)
 {
   /* Set FLASH latency */
