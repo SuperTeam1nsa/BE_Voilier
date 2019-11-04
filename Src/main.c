@@ -32,7 +32,8 @@ void update_position_girouette(void)
 {
 	// rabaisser le flag d'IT
 	LL_TIM_ClearFlag_UPDATE(TIM3);
-	//
+	//lecture: TIM3-CNT
+	//TIM3->CNT;
 	//(*Ptr_ItFct_TIM3)(); //update position
 }	
 
@@ -53,9 +54,13 @@ void config_gpio_girouette(void){ // on pense que ça marche mais c'est à tester 
 	TIM3->SMCR=0x001;
 	//PA6 et pA7 => CH1 et CH2 TIM3 en input 
 	TIM3->CCMR1=0x0101;
-	//TIM3->
+		MyTimer_Start(TIM3);
 	//lance le compteur
-	MyTimer_Start(TIM3);
+	/* reecriture exemple p329 en assembleur...
+	TIM3->CCMR1 |= TIM3->CCMR1 | TIM_CCMR1_CC1S_0 ;
+	TIM3->CCMR1 &= TIM3->CCMR1 | ~TIM_CCMR1_CC1S_1 ;
+	
+	*/
 	/*
 	//active l'interruption 
 	//TIM3->DIER |= 1;
@@ -85,51 +90,51 @@ void config_gpio_girouette(void){ // on pense que ça marche mais c'est à tester 
 	
 }
 
-//a faire
-//TIM1 CH1 PA8
-void config_servoile(void){
+void Pwm_Configure( float rate)
+{
+	//rq: TIM4 CH3 => arr, psc et cnt commun avec l'input (tim4 ch1) 
+	//rq: cf photo pour LL
+	MyTimer_Conf(TIM1,999,71);//180
+	//MyTimer_IT_Conf(TIM1, update_position_girouette,8);
+	//MyTimer_IT_Enable(TIM3);
 	
-	RCC->APB2ENR |= RCC_APB2ENR_TIM1EN ;
+	// Configuration des GPÏO en alternate function.
+	//PB8 en alternate push pull
+	LL_GPIO_SetPinMode(GPIOA,LL_GPIO_PIN_8,LL_GPIO_MODE_ALTERNATE);
+	LL_GPIO_SetPinOutputType(GPIOA,LL_GPIO_PIN_8,LL_GPIO_OUTPUT_PUSHPULL );
 	
-	//pwm ratio compris entre 1 et 2 ms. 
-	float pwm_ratio = 1.0 + (90 + angle%180)/180.0 ;   
-	int pwm_ticks = 20*720/75 ;//a reflechor car tres pas sur
-	int pwm_period = 20 ;
+	int ARR=999; //conçu pour avoir un kilo check doc pour freq servo voile
+	int PSC=71;
+	LL_TIM_InitTypeDef init;
+	init.Prescaler= PSC;
+	init.CounterMode=LL_TIM_COUNTERMODE_UP;
+	init.Autoreload=ARR;
+	init.ClockDivision=LL_TIM_CLOCKDIVISION_DIV1;
+	init.RepetitionCounter=(uint8_t)0x00;
 	
-	//
-	TIM4->CCMR1 |= TIM4->CCMR1 | TIM_CCMR1_CC1S_0 ;
-	TIM4->CCMR1 &= TIM4->CCMR1 | ~TIM_CCMR1_CC1S_1 ;
+	LL_TIM_Init(TIM1,&init);
+	LL_TIM_CC_EnableChannel(TIM1,LL_TIM_CHANNEL_CH1);
+	LL_TIM_OC_SetMode(TIM1,LL_TIM_CHANNEL_CH1,LL_TIM_OCMODE_PWM1);
+	LL_TIM_OC_SetCompareCH1(TIM1,ARR/4);//c'est le ratio
+	LL_TIM_EnableAllOutputs(TIM1);
+	LL_TIM_EnableCounter(TIM1);
 	
-	//Select the active polarity for TI1FP1
-	TIM4->CCER &= TIM4->CCER | ~TIM_CCER_CC1P;
 	
-	//Select the active input for TIMx_CCR2
-	TIM4->CCMR1 &= TIM4->CCMR1 | ~TIM_CCMR1_CC2S_0;
-	TIM4->CCMR1 |= TIM4->CCMR1 | TIM_CCMR1_CC2S_1;
 	
-	//Select the active polarity for TI1FP2
-	TIM4->CCER |= TIM4->CCER | TIM_CCER_CC2P;
-
-	//Select the valid trigger input
-	TIM4->SMCR |= TIM4->SMCR | TIM_SMCR_TS_0;
-	TIM4->SMCR &= TIM4->SMCR | ~TIM_SMCR_TS_1;
-	TIM4->SMCR |= TIM4->SMCR | TIM_SMCR_TS_2;
-
-	//Configure the slave mode controller in reset mode
-	TIM4->SMCR &= TIM4->SMCR | ~TIM_SMCR_SMS_0;
-	TIM4->SMCR &= TIM4->SMCR | ~TIM_SMCR_SMS_1;
-	TIM4->SMCR |= TIM4->SMCR |  TIM_SMCR_SMS_2;
-
-	//Enable the captures
-	TIM4->CCER |= TIM4->CCER | TIM_CCER_CC1E;
-	TIM4->CCER |= TIM4->CCER | TIM_CCER_CC2E;
-
-	TIM4->CCR1 &= TIM4->CCR1 | ~TIM_CCR1_CCR1;
-	TIM4->CCR1 |= TIM4->CCR1 | (11000000 << TIM_CCR1_CCR1_Pos) ;; 
+	/* avec les registres ça ne marche pas... 
+	// configuration de la sortie du CC1 du timer donné en output sur le channel numéro 1  
+	TIM1->CCMR1 &= ~TIM_CCMR1_CC1S;
+	// mise de la polarité à 0 (logique normale) tjrs sur le numéro 1 
+	TIM1->CCER &= ~TIM_CCER_CC1P;
+	// enable la sortie du channel 1 du timer 
+	TIM1->CCER |= TIM_CCER_CC1E;
+	// mettre la pwm en mode 1 
+	TIM1->CCMR1 &= ~TIM_CCMR1_OC1M;
+	TIM1->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2;
+	TIM1->CCR1 = TIM1->ARR*rate;
+	*/
 	
-	TIM4->CCR2 &= TIM4->CCR2 | ~TIM_CCR2_CCR2;
-
-
+	MyTimer_Start(TIM1);
 }
 /**
   * @brief  Main program
@@ -205,8 +210,9 @@ void configUSART(void ){
 	//active l'horloge sur gpioA
 	RCC->APB2ENR |= RCC_APB2ENR_IOPAEN ;
 	//PA2 en alternate push pull
-	LL_GPIO_SetPinMode(GPIOA,LL_GPIO_PIN_2,LL_GPIO_MODE_ALTERNATE|LL_GPIO_MODE_OUTPUT);
-	LL_GPIO_SetPinMode(GPIOA,LL_GPIO_PIN_2,LL_GPIO_OUTPUT_PUSHPULL );
+	LL_GPIO_SetPinMode(GPIOA,LL_GPIO_PIN_2,LL_GPIO_MODE_ALTERNATE);
+	LL_GPIO_SetPinPull(GPIOA,LL_GPIO_PIN_2,LL_GPIO_OUTPUT_PUSHPULL );
+
 }
 */
 
@@ -222,8 +228,9 @@ int main(void)
 
   // Add your application code here 
 
-config_gpio_girouette();
-  
+  config_gpio_girouette();
+  Pwm_Configure(0.75);
+	
   /* Infinite loop */
   while (1)
   {
