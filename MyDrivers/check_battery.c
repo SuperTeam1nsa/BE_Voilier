@@ -1,5 +1,6 @@
 #include "check_battery.h"
 
+/*A vérifier. */
 
 /*=================================================================================
 Programs necessary for monitoring the battery of the project Voilier.
