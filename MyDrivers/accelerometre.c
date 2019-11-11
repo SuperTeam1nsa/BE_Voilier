@@ -1,6 +1,8 @@
 #include "accelerometre.h"
 #include <math.h>
 
+/*A vérifier. HSN*/
+
 int init_accelero() {
 	// Enable clock sur GPIOC
 	(RCC->APB2ENR)|= RCC_APB2ENR_IOPCEN;
