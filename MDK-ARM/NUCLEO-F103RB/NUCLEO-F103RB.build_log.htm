@@ -26,16 +26,19 @@ Project File Date:  10/18/2019
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 6 (build 750)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
-Build target 'NUCLEO-F103RB'
+Rebuild target 'NUCLEO-F103RB'
+compiling stm32f1xx_ll_gpio.c...
+compiling stm32f1xx_ll_utils.c...
+compiling MyTimer.c...
+compiling stm32f1xx_ll_rcc.c...
+compiling stm32f1xx_ll_usart.c...
+assembling startup_stm32f103xb.s...
+compiling stm32f1xx_ll_tim.c...
 compiling main.c...
-../Src/main.c(148): warning:  #177-D: variable "pwm_ticks"  was declared but never referenced
-  	int pwm_ticks = 20*720/75 ;//a reflechor car tres pas sur
-../Src/main.c(149): warning:  #177-D: variable "pwm_period"  was declared but never referenced
-  	int pwm_period = 20 ;
-../Src/main.c: 2 warnings, 0 errors
+compiling system_stm32f1xx.c...
 linking...
-Program Size: Code=1764 RO-data=304 RW-data=20 ZI-data=1028  
-"NUCLEO-F103RB\NUCLEO-F103RB.axf" - 0 Error(s), 2 Warning(s).
+Program Size: Code=1278 RO-data=306 RW-data=20 ZI-data=1028  
+"NUCLEO-F103RB\NUCLEO-F103RB.axf" - 0 Error(s), 0 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -58,7 +61,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.1.1
-Build Time Elapsed:  00:00:03
+Build Time Elapsed:  00:00:05
 </pre>
 </body>
 </html>

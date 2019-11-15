@@ -159,7 +159,7 @@ void MyTimer_PWM_Command_Input(int angle) {
 	//pwm ratio compris entre 1 et 2 ms. 
 	float pwm_ratio = 1.0 + (90 + angle%180)/180.0 ;   
 	int pwm_ticks = pwm_ratio ;
-	int pwm_period = 20 ;
+//	int pwm_period = 20 ;
 	
 	//
 	TIM4->CCMR1 |= TIM4->CCMR1 | TIM_CCMR1_CC1S_0 ;

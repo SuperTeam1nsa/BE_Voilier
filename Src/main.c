@@ -26,8 +26,9 @@
 #include "stm32f1xx_ll_tim.h" 
 #include "stm32f1xx_ll_bus.h" // Pour l'activation des horloges
 
-int angle=0;
+int angle = 0;
 void  SystemClock_Config(void);
+/*
 void update_position_girouette(void)
 {
 	// rabaisser le flag d'IT
@@ -35,26 +36,32 @@ void update_position_girouette(void)
 	//lecture: TIM3-CNT
 	//TIM3->CNT;
 	//(*Ptr_ItFct_TIM3)(); //update position
-}	
+}	*/
 
 /* Private functions ---------------------------------------------------------*/
 void config_gpio_girouette(void){ // on pense que ça marche mais c'est à tester car keil 5 ne permet plus de faire marcher le compteur en titillant les channels 1 et 2 de la simulation.
 	//active l'horloge gpioA
 	RCC->APB2ENR |= RCC_APB2ENR_IOPAEN ;
-	
-
 	//Depending on the sequence the counter counts up or down, the DIR bit in the TIMx_CR1 register is modified by hardware accordingly
 	//valeur de l'angle direcctement dasn TIM3->CNT cf :
 	//This means that the counter just counts continuously between 0 and the auto-reload value in the TIMx_ARR register (0 to ARR or ARR down to 0 depending on the direction)
-	MyTimer_Conf(TIM3,0xB4,0x1);//180
-	MyTimer_IT_Conf(TIM3, update_position_girouette,8);
-	MyTimer_IT_Enable(TIM3);
+	MyTimer_Conf(TIM3,0x167,0x1);//167=359 (0 et 360 confondus) PSC à 1 car on prend qu'un changement d'edge (et pas les 2 )
+	//MyTimer_IT_Conf(TIM3, update_position_girouette,8);
+	//MyTimer_IT_Enable(TIM3);
 		
 	//on compte que sur 1 seul edge p328
 	TIM3->SMCR=0x001;
 	//PA6 et pA7 => CH1 et CH2 TIM3 en input 
 	TIM3->CCMR1=0x0101;
+	//l'user tourne à la maoin la girouette jusqu'à ce qu'elle repasse devant l'index, à ce moment là elle est calibrée 
+	//rq: vrai système on ecrit la valeur à l'arretdu systeme pour éviter recalibrage à chaque démarrage
+	
+ 	while(!LL_GPIO_IsInputPinSet(GPIOA,LL_GPIO_PIN_5))//GPIOA->IDR & (1<<5) == (1<<5))
+		{
+	}
+	 // calibrée
 		MyTimer_Start(TIM3);
+	
 	//lance le compteur
 	/* reecriture exemple p329 en assembleur...
 	TIM3->CCMR1 |= TIM3->CCMR1 | TIM_CCMR1_CC1S_0 ;
@@ -86,24 +93,37 @@ void config_gpio_girouette(void){ // on pense que ça marche mais c'est à tester 
 	My_LL_Tim_Init_Struct.RepetitionCounter=0;
 	LL_TIM_Init(TIM3,&My_LL_Tim_Init_Struct);
 	*/
-
-	
 }
 
-void Pwm_Configure( float rate)
+void servo_voile(void)
+{
+	angle=TIM3->CNT;
+	int time_up;
+	if(angle>=315 || angle<=45)
+		time_up=20;
+	else if(angle<180)
+		time_up=20+(angle-45)*(-10/135);
+	else
+		time_up=10+(angle-180)*(10/135); // __  __
+	//com : courbe de cette forme :   \/   avec des coupure à 45° 180° et 315°. Si on veut une courbe puremment affine on peut mettre 180 en dénominateur (pas le cas ici)
+	LL_TIM_OC_SetCompareCH1(TIM1,49/time_up);//49=ARRc'est le ratio rq: de 10 à 20 pour avoir de 1 à 2 ms
+	
+}
+void Pwm_Configure(void)
 {
 	//rq: TIM4 CH3 => arr, psc et cnt commun avec l'input (tim4 ch1) 
+
 	//rq: cf photo pour LL
-	MyTimer_Conf(TIM1,999,71);//180
-	//MyTimer_IT_Conf(TIM1, update_position_girouette,8);
-	//MyTimer_IT_Enable(TIM3);
-	
+  RCC->APB2ENR|=RCC_APB2ENR_IOPAEN;
+	//MyTimer_Conf(TIM1,999,71);//180
+	LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM1);
 	// Configuration des GPÏO en alternate function.
 	//PB8 en alternate push pull
 	LL_GPIO_SetPinMode(GPIOA,LL_GPIO_PIN_8,LL_GPIO_MODE_ALTERNATE);
 	LL_GPIO_SetPinOutputType(GPIOA,LL_GPIO_PIN_8,LL_GPIO_OUTPUT_PUSHPULL );
+
 	
-	int ARR=999; //conçu pour avoir un kilo check doc pour freq servo voile
+	int ARR=999; //conçu pour avoir un kilo check doc pour freq servo voile //49
 	int PSC=71;
 	LL_TIM_InitTypeDef init;
 	init.Prescaler= PSC;
@@ -111,14 +131,15 @@ void Pwm_Configure( float rate)
 	init.Autoreload=ARR;
 	init.ClockDivision=LL_TIM_CLOCKDIVISION_DIV1;
 	init.RepetitionCounter=(uint8_t)0x00;
-	
+
 	LL_TIM_Init(TIM1,&init);
 	LL_TIM_CC_EnableChannel(TIM1,LL_TIM_CHANNEL_CH1);
 	LL_TIM_OC_SetMode(TIM1,LL_TIM_CHANNEL_CH1,LL_TIM_OCMODE_PWM1);
-	LL_TIM_OC_SetCompareCH1(TIM1,ARR/4);//c'est le ratio
+	LL_TIM_OC_SetCompareCH1(TIM1,ARR/10);//c'est le ratio entre 10 et 20
 	LL_TIM_EnableAllOutputs(TIM1);
 	LL_TIM_EnableCounter(TIM1);
-	
+	MyTimer_Start(TIM1);
+}
 	
 	
 	/* avec les registres ça ne marche pas... 
@@ -134,8 +155,7 @@ void Pwm_Configure( float rate)
 	TIM1->CCR1 = TIM1->ARR*rate;
 	*/
 	
-	MyTimer_Start(TIM1);
-}
+
 /**
   * @brief  Main program
   * @param  None
@@ -228,13 +248,13 @@ int main(void)
 
   // Add your application code here 
 
-  config_gpio_girouette();
-  Pwm_Configure(0.75);
-	
+  
+  Pwm_Configure();
+	//config_gpio_girouette();
   /* Infinite loop */
   while (1)
   {
-			
+			//servo_voile();
 		/*USART
 		if(LL_USART_IsActiveFlag_RXNE(USART2)){ //flag : on recoit l'ordre d'ecrire #custom 
 			  Time *ct=Chrono_Read();
@@ -283,7 +303,7 @@ void SystemClock_Config(void)
   /* Enable HSE oscillator */
 	// ********* Commenter la ligne ci-dessous pour MCBSTM32 *****************
 	// ********* Conserver la ligne si Nucléo*********************************
-  LL_RCC_HSE_EnableBypass();
+  LL_RCC_HSE_EnableBypass(); //à commenter si bateau
   LL_RCC_HSE_Enable();
   while(LL_RCC_HSE_IsReady() != 1)
   {
