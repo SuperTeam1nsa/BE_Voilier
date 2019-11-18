@@ -25,14 +25,17 @@
 #include "stm32f1xx_ll_usart.h"
 #include "stm32f1xx_ll_tim.h" 
 #include "stm32f1xx_ll_bus.h" // Pour l'activation des horloges
+//#include "check_battery.h"
+//#include "accelerometre.h"
 
 int angle = 0;
+float time_up=10;
 void  SystemClock_Config(void);
 /*
 void update_position_girouette(void)
 {
 	// rabaisser le flag d'IT
-	LL_TIM_ClearFlag_UPDATE(TIM3);
+	LL_TIM_ClearFlag_UPDATE(TIM3ccc);
 	//lecture: TIM3-CNT
 	//TIM3->CNT;
 	//(*Ptr_ItFct_TIM3)(); //update position
@@ -59,6 +62,7 @@ void config_gpio_girouette(void){ // on pense que ça marche mais c'est à tester 
  	while(!LL_GPIO_IsInputPinSet(GPIOA,LL_GPIO_PIN_5))//GPIOA->IDR & (1<<5) == (1<<5))
 		{
 	}
+	//TIM3->CNT=180; //car quand vent de face, 0 et quand arrière : 180 degrés
 	 // calibrée
 		MyTimer_Start(TIM3);
 	
@@ -98,18 +102,73 @@ void config_gpio_girouette(void){ // on pense que ça marche mais c'est à tester 
 void servo_voile(void)
 {
 	angle=TIM3->CNT;
-	int time_up;
+
 	if(angle>=315 || angle<=45)
 		time_up=20;
 	else if(angle<180)
-		time_up=20+(angle-45)*(-10/135);
+		time_up=20.00+(angle-45)*(-10.00/135.00);
 	else
-		time_up=10+(angle-180)*(10/135); // __  __
-	//com : courbe de cette forme :   \/   avec des coupure à 45° 180° et 315°. Si on veut une courbe puremment affine on peut mettre 180 en dénominateur (pas le cas ici)
-	LL_TIM_OC_SetCompareCH1(TIM1,49/time_up);//49=ARRc'est le ratio rq: de 10 à 20 pour avoir de 1 à 2 ms
+		time_up=10.00+(angle-180)*(10.00/135.00); //__  __
+	//com : courbe de cette forme :        \/      avec des coupure à 45° 180° et 315°. Si on veut une courbe puremment affine on peut mettre 180 en dénominateur (pas le cas ici)
+	LL_TIM_OC_SetCompareCH1(TIM1,(int)(19999/time_up));//49=ARRc'est le ratio rq: de 10 à 20 pour avoir de 1 à 2 ms
 	
 }
-void Pwm_Configure(void)
+void CC(float rate)
+{
+	//rq: PA2 est aussi TIM2_CH3 (ne pas s'inquieter si TIM_CH3 s'allume)
+			//max 60% moteur
+	//marge 0.003 au centre
+	if(rate <0.072)
+	{LL_GPIO_SetPinPull(GPIOA,LL_GPIO_PIN_2,LL_GPIO_PULL_UP);
+		rate=(rate*0.6)/0.072;
+	}
+	else if( rate >0.078){
+		LL_GPIO_SetPinPull(GPIOA,LL_GPIO_PIN_2,LL_GPIO_PULL_DOWN);
+	rate=(rate*0.6)/0.1;
+	}
+	if(rate>=0.072 && rate<=0.078)
+		LL_TIM_OC_SetCompareCH2(TIM2,0); 
+	else{
+
+	LL_TIM_OC_SetCompareCH2(TIM2,TIM2->ARR*rate); // varie de 0.05 à 0.1 
+	}
+}
+void Pwm_Configure_CC(void) //TIM2 CH2
+{
+  //rq: cf photo pour LL
+  RCC->APB2ENR|=RCC_APB2ENR_IOPAEN;
+	// on clocke le Tim2
+	//RCC->APB1ENR |= RCC_APB1ENR_TIM2EN ;
+	
+	//MyTimer_Conf(TIM2,999,71);//180
+	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
+	// Configuration des GPÏO en alternate function.
+	//PB8 en alternate push pull
+	LL_GPIO_SetPinMode(GPIOA,LL_GPIO_PIN_1,LL_GPIO_MODE_ALTERNATE);
+	LL_GPIO_SetPinOutputType(GPIOA,LL_GPIO_PIN_1,LL_GPIO_OUTPUT_PUSHPULL );
+
+	LL_GPIO_SetPinMode(GPIOA,LL_GPIO_PIN_2,LL_GPIO_MODE_OUTPUT);
+	//init dej faite pwm input (ici pour test)
+	int ARR=19999; //conçu pour avoir un kilo check doc pour freq servo voile //49
+	int PSC=71;
+	LL_TIM_InitTypeDef init;
+	init.Prescaler= PSC;
+	init.CounterMode=LL_TIM_COUNTERMODE_UP;
+	init.Autoreload=ARR;
+	init.ClockDivision=LL_TIM_CLOCKDIVISION_DIV1;
+	init.RepetitionCounter=(uint8_t)0x00;
+	LL_TIM_Init(TIM2,&init);
+	//fin init
+	
+	
+	LL_TIM_CC_EnableChannel(TIM2,LL_TIM_CHANNEL_CH2);
+	LL_TIM_OC_SetMode(TIM2,LL_TIM_CHANNEL_CH2,LL_TIM_OCMODE_PWM1);
+	LL_TIM_OC_SetCompareCH2(TIM2,0);//ARR/10c'est le ratio entre 10 et 90 %
+	LL_TIM_EnableAllOutputs(TIM2);
+	LL_TIM_EnableCounter(TIM2);
+	MyTimer_Start(TIM2);
+}
+void Pwm_Configure_Servoile(void) //TIM1
 {
 	//rq: TIM4 CH3 => arr, psc et cnt commun avec l'input (tim4 ch1) 
 
@@ -123,7 +182,7 @@ void Pwm_Configure(void)
 	LL_GPIO_SetPinOutputType(GPIOA,LL_GPIO_PIN_8,LL_GPIO_OUTPUT_PUSHPULL );
 
 	
-	int ARR=999; //conçu pour avoir un kilo check doc pour freq servo voile //49
+	int ARR=19999; //conçu pour avoir un kilo check doc pour freq servo voile //49
 	int PSC=71;
 	LL_TIM_InitTypeDef init;
 	init.Prescaler= PSC;
@@ -249,12 +308,18 @@ int main(void)
   // Add your application code here 
 
   
-  Pwm_Configure();
-	//config_gpio_girouette();
+  Pwm_Configure_Servoile();
+	Pwm_Configure_CC();
+//	config_gpio_girouette();
   /* Infinite loop */
+//	CC(0.10);
+	
+	//init_accelero();
+  
   while (1)
   {
-			//servo_voile();
+			servo_voile();
+		CC(0.06);
 		/*USART
 		if(LL_USART_IsActiveFlag_RXNE(USART2)){ //flag : on recoit l'ordre d'ecrire #custom 
 			  Time *ct=Chrono_Read();
@@ -303,7 +368,7 @@ void SystemClock_Config(void)
   /* Enable HSE oscillator */
 	// ********* Commenter la ligne ci-dessous pour MCBSTM32 *****************
 	// ********* Conserver la ligne si Nucléo*********************************
-  LL_RCC_HSE_EnableBypass(); //à commenter si bateau
+  //LL_RCC_HSE_EnableBypass(); //à commenter si bateau
   LL_RCC_HSE_Enable();
   while(LL_RCC_HSE_IsReady() != 1)
   {

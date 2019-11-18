@@ -404,6 +404,21 @@
               <FileType>1</FileType>
               <FilePath>..\MyDrivers\MyTimer.c</FilePath>
             </File>
+            <File>
+              <FileName>accelerometre.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\MyDrivers\accelerometre.h</FilePath>
+            </File>
+            <File>
+              <FileName>check_battery.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\MyDrivers\check_battery.h</FilePath>
+            </File>
+            <File>
+              <FileName>MyTimer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\MyDrivers\MyTimer.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -863,6 +878,21 @@
               <FileName>MyTimer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\MyDrivers\MyTimer.c</FilePath>
+            </File>
+            <File>
+              <FileName>accelerometre.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\MyDrivers\accelerometre.h</FilePath>
+            </File>
+            <File>
+              <FileName>check_battery.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\MyDrivers\check_battery.h</FilePath>
+            </File>
+            <File>
+              <FileName>MyTimer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\MyDrivers\MyTimer.h</FilePath>
             </File>
           </Files>
         </Group>
