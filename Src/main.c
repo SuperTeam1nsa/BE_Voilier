@@ -22,6 +22,7 @@
 #include "stm32f1xx_ll_gpio.h" 
 //#include "Chrono.h"
 #include "MyTimer.h"
+#include "stdbool.h"
 #include "stm32f1xx_ll_usart.h"
 #include "stm32f1xx_ll_tim.h" 
 #include "stm32f1xx_ll_bus.h" // Pour l'activation des horloges
@@ -31,6 +32,161 @@
 int angle = 0;
 float time_up=10;
 void  SystemClock_Config(void);
+
+
+//variable telecommande et accelero et battery
+int accelero_droit=0;
+float angleG ;
+float duree_imp;
+float period;
+float ratio ; 
+float acc;
+float acc_G;
+float y;
+int arret_urgence=0;
+bool B_battery;
+float niveau_battery;
+/*=========Telecommande==========*/
+//fonction a looper pour le servomoteur
+float Loop_Pwm(void) {
+		//extraire angle	
+		 duree_imp=TIM4->CCR2;
+		 period = TIM4->CCR1 ;
+		 ratio=duree_imp/period; 
+	
+	//position neutre si télécommande au milieu, absence de signal ou valeur aberrante
+	//ratio entre  0.050 et 0.1 en normal
+	//ne tourne pas 
+			if ((ratio > 0.070 && ratio <0.080) || (ratio <0.040) || (ratio >0.11)) {
+			ratio = 0.075;
+		}
+		return ratio ;
+	
+}
+
+//Paramétrer TIM4 Ch1 en PWM input
+void MyTimer_PWM_Init_Input() {
+// on clocke le Tim4
+	RCC->APB1ENR |= RCC_APB1ENR_TIM4EN ;
+	 MyTimer_Conf(TIM4,1439,1499);	
+
+	//
+	TIM4->CCMR1 |= TIM4->CCMR1 | TIM_CCMR1_CC1S_0 ;
+	TIM4->CCMR1 &= TIM4->CCMR1 | ~TIM_CCMR1_CC1S_1 ;
+	
+	//Select the active polarity for TI1FP1
+	TIM4->CCER &= TIM4->CCER | ~TIM_CCER_CC1P;
+	
+	//CEN à 1
+	TIM4->CR1 |= TIM4->CR1 | TIM_CR1_CEN;
+	
+	//Select the active input for TIMx_CCR2
+	TIM4->CCMR1 &= TIM4->CCMR1 | ~TIM_CCMR1_CC2S_0;
+	TIM4->CCMR1 |= TIM4->CCMR1 | TIM_CCMR1_CC2S_1;
+	
+	//Select the active polarity for TI1FP2
+	TIM4->CCER |= TIM4->CCER | TIM_CCER_CC2P;
+
+	//Select the valid trigger input
+	TIM4->SMCR |= TIM4->SMCR | TIM_SMCR_TS_0;
+	TIM4->SMCR &= TIM4->SMCR | ~TIM_SMCR_TS_1;
+	TIM4->SMCR |= TIM4->SMCR | TIM_SMCR_TS_2;
+
+	//Configure the slave mode controller in reset mode
+	TIM4->SMCR &= TIM4->SMCR | ~TIM_SMCR_SMS_0;
+	TIM4->SMCR &= TIM4->SMCR | ~TIM_SMCR_SMS_1;
+	TIM4->SMCR |= TIM4->SMCR |  TIM_SMCR_SMS_2;
+
+	//Enable the captures
+	TIM4->CCER |= TIM4->CCER | TIM_CCER_CC1E;
+	TIM4->CCER |= TIM4->CCER | TIM_CCER_CC2E;
+
+	TIM4->CCR1 &= TIM4->CCR1 | ~TIM_CCR1_CCR1;
+	TIM4->CCR1 |= TIM4->CCR1 | (11000000 << TIM_CCR1_CCR1_Pos) ;; 
+	
+	TIM4->CCR2 &= TIM4->CCR2 | ~TIM_CCR2_CCR2;
+}
+
+/*===========Accelerometre=========*/
+float MyAccelero_ADC(void) 
+{
+		y= ADC1->DR << ADC_DR_DATA_Pos ; 
+		//max 1.90V
+		//min 1.45 V
+		
+		//return valeur y* (delta voltage reçu) / 90 degré
+		//acc= (float) y*0.45/90.0;
+	
+	//return y -> min (bateau couché) = 1650; max (bateau normal) = 2150
+	// à faire dans le main : si y<1900, ne plus border les voiles
+		return y ; 
+}
+
+void MyADC_init_accelero(ADC_TypeDef * ADC){
+	// On va utiliser l'ADC 1 pour l'accéléro 
+	
+	//Mettre en mode adc
+	RCC->APB2ENR |= RCC_APB2ENR_ADC1EN ;
+	ADC->CR2 |= ADC->CR2 | ADC_CR2_ADON ;
+	//----------METTRE PSC A 1----------changer clock !!!!
+
+	LL_RCC_SetAPB2Prescaler(4)	;
+	
+	ADC->SQR3 = 11;
+	ADC-> CR2 |= ADC_CR2_EXTTRIG ; 
+	
+}
+
+
+
+/*===========Batterie=========*/
+bool Loop_MyBattery_Is_Low() 
+{ 
+		niveau_battery = (ADC2->DR << ADC_DR_DATA_Pos);
+		return ((ADC2->DR << ADC_DR_DATA_Pos) < 0.74); 
+	// max 12v avec 0.92V qui rentrent dans l'ADC 
+	// trigger à 9.6V -> 0.74 V qui rentrent dans l'ADC
+}
+void MyADC_init_battery(ADC_TypeDef * ADC){
+	// On va utiliser l'ADC 2 Pour la batterie 
+	
+	//Mettre en mode adc
+	RCC->APB2ENR |= RCC_APB2ENR_ADC2EN ;
+	ADC->CR2 |= ADC->CR2 | ADC_CR2_ADON ;
+	
+	LL_RCC_SetADCClockSource(1);
+	
+	ADC-> CR2 |= ADC_CR2_EXTTRIG ;  
+}
+void Usart_Init(USART_TypeDef *ll_usart) {
+	//Clock Enabled
+	LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_USART1);
+
+	LL_USART_InitTypeDef ll_usart1;
+	LL_USART_EnableSCLKOutput(ll_usart) ; 
+	LL_USART_StructInit(&ll_usart1);
+	LL_USART_Init(ll_usart,&ll_usart1);
+
+	// Port Pa9, entrée de l'USART 
+	LL_GPIO_InitTypeDef ll_PA9;
+	ll_PA9.Mode = LL_GPIO_MODE_ALTERNATE ; 
+	ll_PA9.OutputType = LL_GPIO_OUTPUT_PUSHPULL  ; 
+	ll_PA9.Pin = LL_GPIO_PIN_9 ; 
+	ll_PA9.Pull = LL_GPIO_PULL_DOWN ; 
+	ll_PA9.Speed = LL_GPIO_MODE_OUTPUT_2MHz;
+	LL_GPIO_Init(GPIOA,&ll_PA9);  	
+}
+
+void Usart_Transmit_Low_Battery(USART_TypeDef *ll_usart){
+	//test : On veut transmettre un 'A' 
+	LL_USART_TransmitData8(ll_usart, 0x41);
+}
+
+void Usart_Transmit_High_Battery(USART_TypeDef *ll_usart){
+	//test : On veut transmettre un 'B' 
+	LL_USART_TransmitData8(ll_usart, 0x42);
+}
+//
 /*
 void update_position_girouette(void)
 {
@@ -99,10 +255,15 @@ void config_gpio_girouette(void){ // on pense que ça marche mais c'est à tester 
 	*/
 }
 
-void servo_voile(void)
-{
-	angle=TIM3->CNT;
+void servo_voile(void){
 
+int inclinaison =MyAccelero_ADC();
+	//amplitude de 400 et valeur en absolue dépendent du capteur
+	//relever un peu les voiles avant de repartir normalement
+	//double trigger
+	if( (inclinaison > (accelero_droit-150) && arret_urgence==0) || (inclinaison > (accelero_droit-110) && arret_urgence==1)){
+	angle=TIM3->CNT;
+	arret_urgence=0;
 	if(angle>=315 || angle<=45)
 		time_up=20;
 	else if(angle<180)
@@ -111,22 +272,27 @@ void servo_voile(void)
 		time_up=10.00+(angle-180)*(10.00/135.00); //__  __
 	//com : courbe de cette forme :        \/      avec des coupure à 45° 180° et 315°. Si on veut une courbe puremment affine on peut mettre 180 en dénominateur (pas le cas ici)
 	LL_TIM_OC_SetCompareCH1(TIM1,(int)(19999/time_up));//49=ARRc'est le ratio rq: de 10 à 20 pour avoir de 1 à 2 ms
-	
+}
+	else{
+		//bordage urgence (on lache les voiles) 
+		arret_urgence=1;
+		LL_TIM_OC_SetCompareCH1(TIM1,(int)(19999.0/20.0));
+	}
 }
 void CC(float rate)
 {
 	//rq: PA2 est aussi TIM2_CH3 (ne pas s'inquieter si TIM_CH3 s'allume)
-			//max 60% moteur
-	//marge 0.003 au centre
-	if(rate <0.072)
+			//max 60% moteur (*0.6)
+	//marge 0.005 au centre
+	if(rate <0.070)
 	{LL_GPIO_SetPinPull(GPIOA,LL_GPIO_PIN_2,LL_GPIO_PULL_UP);
-		rate=(rate*0.6)/0.072;
+		rate=(rate*0.6)/0.070;
 	}
-	else if( rate >0.078){
+	else if( rate >0.080){
 		LL_GPIO_SetPinPull(GPIOA,LL_GPIO_PIN_2,LL_GPIO_PULL_DOWN);
 	rate=(rate*0.6)/0.1;
 	}
-	if(rate>=0.072 && rate<=0.078)
+	if(rate>=0.070 && rate<=0.080)
 		LL_TIM_OC_SetCompareCH2(TIM2,0); 
 	else{
 
@@ -299,46 +465,33 @@ void configUSART(void ){
 int main(void)
 {
 	
-	//rq:add configUsart dans chrono.c et lève flag RXNE dans task10ms
-	//configUSART();
-
-  // Configure the system clock to 72 MHz 
+	// Configure the system clock to 72 MHz 
   SystemClock_Config();
+	
+	//initialisation pwm télécommande
+	MyTimer_PWM_Init_Input();
+	//initialisation adc accelero
+	MyADC_init_accelero(ADC1);
 
-  // Add your application code here 
-
-  
+	MyADC_init_battery(ADC2);
+	Usart_Init(USART1);
+	
   Pwm_Configure_Servoile();
 	Pwm_Configure_CC();
-//	config_gpio_girouette();
-  /* Infinite loop */
-//	CC(0.10);
 	
-	//init_accelero();
-  
+	accelero_droit= MyAccelero_ADC();
+  //config_gpio_girouette();
+	/* Infinite loop */
   while (1)
   {
 			servo_voile();
-		CC(0.06);
-		/*USART
-		if(LL_USART_IsActiveFlag_RXNE(USART2)){ //flag : on recoit l'ordre d'ecrire #custom 
-			  Time *ct=Chrono_Read();
-				send(ct->Min);
-				send(':');
-				send(ct->Sec);
-				send(':');
-				send(ct->Hund);
-				send(':');
-				send(0x0D);//0x0D =retour chariot
-				LL_USART_ClearFlag_RXNE(USART2);
-				}
-		Chrono_Background();
-  }*/
-		
-
-	
-	};
-
+			CC(Loop_Pwm());
+			if(Loop_MyBattery_Is_Low()){
+				Usart_Transmit_Low_Battery(USART1);
+			}
+			else
+				Usart_Transmit_High_Battery(USART1);
+	}
 }
 
 
