@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/*===========Batterie=========*/
+/*===========USART=========*/
 
 void Usart_Init() {
 
@@ -44,6 +44,25 @@ void Usart_Init() {
 	
 }
 
+//linked with USART
+void s_char(char a){
+	
+	while(LL_USART_IsActiveFlag_TXE(USART1))
+		LL_USART_TransmitData8(USART1,a);
+	
+	while(!LL_USART_IsActiveFlag_TC(USART1));
+}	
+
+void send_msg (char * msg){
+	int i = 0;
+	while( i < strlen(msg)) {
+		s_char(msg[i]);
+		i++;
+	}
+}
+
+/*===========BATTERY=========*/
+
 void init_battery(){
 	RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
 	LL_GPIO_SetPinMode(GPIOC, 2, LL_GPIO_MODE_FLOATING);
@@ -62,19 +81,4 @@ int battery(){
 	return (level < 0x0700);
 }
 
-//linked with USART
-void s_char(char a){
-	
-	while(LL_USART_IsActiveFlag_TXE(USART1))
-		LL_USART_TransmitData8(USART1,a);
-	
-	while(!LL_USART_IsActiveFlag_TC(USART1));
-}	
 
-void send_msg (char * msg){
-	int i = 0;
-	while( i < strlen(msg)) {
-		s_char(msg[i]);
-		i++;
-	}
-}
