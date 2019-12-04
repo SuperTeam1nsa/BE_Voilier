@@ -14,9 +14,9 @@ INSA TOULOUSE
 	
 * Mesure information télecom : Il est possible d'obtenir une image de la position du manche de la télécommande : Fonctionne
 
-*Rotation du plateau : Commander la rotation du plateau dans un sens ou dans l'autre : Ok. 
+* Rotation du plateau : Commander la rotation du plateau dans un sens ou dans l'autre : Ok. 
 
-*Emission UART : Message d'alerte batterie : A TESTER
+* Emission UART : Message d'alerte batterie : A TESTER
 
 	
 ## Conclusion :
