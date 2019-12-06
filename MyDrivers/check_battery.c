@@ -1,50 +1,84 @@
 #include "check_battery.h"
 
-/*===========Batterie=========*/
-bool Loop_MyBattery_Is_Low(void) 
-{ 
-		float niveau_battery = (ADC2->DR << ADC_DR_DATA_Pos);
-		return (niveau_battery < 0.74); 
-	// max 12v avec 0.92V qui rentrent dans l'ADC 
-	// trigger à 9.6V -> 0.74 V qui rentrent dans l'ADC
-}
-void MyADC_init_battery(ADC_TypeDef * ADC){
-	// On va utiliser l'ADC 2 Pour la batterie 
+#include <stm32f1xx_ll_usart.h>
+#include <stm32f1xx_ll_gpio.h>
+#include "stm32f1xx_ll_adc.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/*===========USART=========*/
+
+void Usart_Init() {
+
+	RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
+	RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
 	
-	//Mettre en mode adc
-	RCC->APB2ENR |= RCC_APB2ENR_ADC2EN ;
-	ADC->CR2 |= ADC->CR2 | ADC_CR2_ADON ;
+	LL_GPIO_InitTypeDef gpio;
 	
-	LL_RCC_SetADCClockSource(1);
+	gpio.Pin = LL_GPIO_PIN_11;
+	gpio.Mode = LL_GPIO_MODE_OUTPUT;
+	gpio.Speed = LL_GPIO_SPEED_FREQ_MEDIUM;
+	gpio.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+	gpio.Pull = LL_GPIO_PULL_DOWN;
 	
-	ADC-> CR2 |= ADC_CR2_EXTTRIG ;  
-}
-void Usart_Init(USART_TypeDef *ll_usart) {
-	//Clock Enabled
-	LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_USART1);
+	LL_GPIO_Init(GPIOA, &gpio);
+	
+	gpio.Pin = LL_GPIO_PIN_9;
+	gpio.Mode = LL_GPIO_MODE_ALTERNATE;
+	gpio.Speed = LL_GPIO_SPEED_FREQ_MEDIUM;
+	gpio.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+	gpio.Pull = LL_GPIO_PULL_DOWN;
+	LL_GPIO_Init(GPIOA, &gpio);
+	
+	LL_USART_InitTypeDef USART_InitStruct;
+	
+	LL_USART_Enable(USART1);
 
-	LL_USART_InitTypeDef ll_usart1;
-	LL_USART_EnableSCLKOutput(ll_usart) ; 
-	LL_USART_StructInit(&ll_usart1);
-	LL_USART_Init(ll_usart,&ll_usart1);
-
-	// Port Pa9, entrée de l'USART 
-	LL_GPIO_InitTypeDef ll_PA9;
-	ll_PA9.Mode = LL_GPIO_MODE_ALTERNATE ; 
-	ll_PA9.OutputType = LL_GPIO_OUTPUT_PUSHPULL  ; 
-	ll_PA9.Pin = LL_GPIO_PIN_9 ; 
-	ll_PA9.Pull = LL_GPIO_PULL_DOWN ; 
-	ll_PA9.Speed = LL_GPIO_MODE_OUTPUT_2MHz;
-	LL_GPIO_Init(GPIOA,&ll_PA9);  	
-}
-
-void Usart_Transmit_Low_Battery(USART_TypeDef *ll_usart){
-	//test : On veut transmettre un 'A' 
-	LL_USART_TransmitData8(ll_usart, 0x41);
+ 	LL_USART_StructInit(&USART_InitStruct); 
+	
+	LL_USART_SetBaudRate(USART1,72000000,9600);
+	LL_USART_Init (USART1, &USART_InitStruct);
+	LL_USART_EnableDirectionTx (USART1);
+	
 }
 
-void Usart_Transmit_High_Battery(USART_TypeDef *ll_usart){
-	//test : On veut transmettre un 'B' 
-	LL_USART_TransmitData8(ll_usart, 0x42);
+//linked with USART
+void s_char(char a){
+	
+	while(LL_USART_IsActiveFlag_TXE(USART1))
+		LL_USART_TransmitData8(USART1,a);
+	
+	while(!LL_USART_IsActiveFlag_TC(USART1));
+}	
+
+void send_msg (char * msg){
+	int i = 0;
+	while( i < strlen(msg)) {
+		s_char(msg[i]);
+		i++;
+	}
 }
+
+/*===========BATTERY=========*/
+
+void init_battery(){
+	RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
+	LL_GPIO_SetPinMode(GPIOC, 2, LL_GPIO_MODE_FLOATING);
+	ADC1->CR2 |= ADC_CR2_ADON;
+}
+
+//return a boolean
+int battery(){
+	ADC1->SQR3 = 0 ;
+	ADC1->SQR3 |= (1<<3) | (1<< 2);
+	ADC1->CR2 |= ADC_CR2_ADON;
+	ADC1->SMPR1 |= (7<<6) ;
+	while((ADC1->SR & ADC_SR_EOC) == 1){}
+	
+	unsigned int level = ADC1->DR;;	
+	return (level < 0x0700);
+}
+
 

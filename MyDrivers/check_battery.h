@@ -9,9 +9,9 @@
 #include "stm32f1xx_ll_rcc.h"
 
 
-bool Loop_MyBattery_Is_Low(void);
-void MyADC_init_battery(ADC_TypeDef * ADC);
-void Usart_Init(USART_TypeDef *ll_usart);
-void Usart_Transmit_Low_Battery(USART_TypeDef *ll_usart);
-void Usart_Transmit_High_Battery(USART_TypeDef *ll_usart);
+void Usart_Init();
+void s_char(char a);
+void send_msg (char * msg);
+void init_battery();
+int battery();
 #endif
