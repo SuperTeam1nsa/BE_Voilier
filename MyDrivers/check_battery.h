@@ -9,9 +9,9 @@
 #include "stm32f1xx_ll_rcc.h"
 
 
-void Usart_Init();
+void Usart_Init(void);
 void s_char(char a);
 void send_msg (char * msg);
-void init_battery();
-int battery();
+void init_battery(void);
+int battery(void);
 #endif

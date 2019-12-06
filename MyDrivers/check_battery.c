@@ -66,18 +66,18 @@ void send_msg (char * msg){
 void init_battery(){
 	RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
 	LL_GPIO_SetPinMode(GPIOC, 2, LL_GPIO_MODE_FLOATING);
-	ADC1->CR2 |= ADC_CR2_ADON;
+	ADC2->CR2 |= ADC_CR2_ADON;
 }
 
 //return a boolean
 int battery(){
-	ADC1->SQR3 = 0 ;
-	ADC1->SQR3 |= (1<<3) | (1<< 2);
-	ADC1->CR2 |= ADC_CR2_ADON;
-	ADC1->SMPR1 |= (7<<6) ;
-	while((ADC1->SR & ADC_SR_EOC) == 1){}
+	ADC2->SQR3 = 0 ;
+	ADC2->SQR3 |= (1<<3) | (1<< 2);
+	ADC2->CR2 |= ADC_CR2_ADON;
+	ADC2->SMPR1 |= (7<<6) ;
+	while((ADC2->SR & ADC_SR_EOC) == 1){}
 	
-	unsigned int level = ADC1->DR;;	
+	unsigned int level = ADC2->DR;;	
 	return (level < 0x0700);
 }
 

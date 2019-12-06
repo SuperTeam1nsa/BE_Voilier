@@ -30,10 +30,10 @@
 
 
 void  SystemClock_Config(void);
-
+	
 int main(void)
 {
-	
+	//int level_battery ;
 	// Configure the system clock to 72 MHz 
   SystemClock_Config();
 	
@@ -42,8 +42,8 @@ int main(void)
 	//initialisation adc accelero
 	MyADC_init_accelero(ADC1);
 
-	//MyADC_init_battery(ADC2);
-	//Usart_Init(USART1);
+/*	init_battery();
+	Usart_Init();*/
 	
   Pwm_Configure_Servoile();
 	Pwm_Configure_CC();
@@ -52,17 +52,17 @@ int main(void)
   config_gpio_girouette();// attention faire un tour de girouette pour avancer dans le code !
 	position_centrale_telecommande=Raw_Pwm();
 	/* Infinite loop */
+
   while (1)
   {
 			servo_voile();
 			CC(Loop_Pwm());
-			/*if(Loop_MyBattery_Is_Low())
-				Usart_Transmit_Low_Battery(USART1);
-			else
-				Usart_Transmit_High_Battery(USART1);*/
-	}
+		 /* level_battery = battery();
+			if(level_battery){
+			 	send_msg("LowBattery"); }*/
+	
 }
-
+}
 
 
 

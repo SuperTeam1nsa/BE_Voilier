@@ -45,14 +45,12 @@ Section Cross References
     mytimer.o(i.TIM3_IRQHandler) refers to mytimer.o(.data) for Ptr_ItFct_TIM3
     mytimer.o(i.TIM4_IRQHandler) refers to mytimer.o(i.LL_TIM_ClearFlag_UPDATE) for LL_TIM_ClearFlag_UPDATE
     mytimer.o(i.TIM4_IRQHandler) refers to mytimer.o(.data) for Ptr_ItFct_TIM4
-    check_battery.o(i.Loop_MyBattery_Is_Low) refers to ffltui.o(.text) for __aeabi_ui2f
-    check_battery.o(i.Loop_MyBattery_Is_Low) refers to f2d.o(.text) for __aeabi_f2d
-    check_battery.o(i.Loop_MyBattery_Is_Low) refers to cdcmple.o(.text) for __aeabi_cdcmple
-    check_battery.o(i.Usart_Init) refers to stm32f1xx_ll_usart.o(i.LL_USART_StructInit) for LL_USART_StructInit
-    check_battery.o(i.Usart_Init) refers to stm32f1xx_ll_usart.o(i.LL_USART_Init) for LL_USART_Init
     check_battery.o(i.Usart_Init) refers to stm32f1xx_ll_gpio.o(i.LL_GPIO_Init) for LL_GPIO_Init
-    check_battery.o(i.Usart_Transmit_High_Battery) refers to check_battery.o(i.LL_USART_TransmitData8) for LL_USART_TransmitData8
-    check_battery.o(i.Usart_Transmit_Low_Battery) refers to check_battery.o(i.LL_USART_TransmitData8) for LL_USART_TransmitData8
+    check_battery.o(i.Usart_Init) refers to stm32f1xx_ll_usart.o(i.LL_USART_StructInit) for LL_USART_StructInit
+    check_battery.o(i.Usart_Init) refers to check_battery.o(i.LL_USART_SetBaudRate) for LL_USART_SetBaudRate
+    check_battery.o(i.Usart_Init) refers to stm32f1xx_ll_usart.o(i.LL_USART_Init) for LL_USART_Init
+    check_battery.o(i.send_msg) refers to check_battery.o(i.s_char) for s_char
+    check_battery.o(i.send_msg) refers to strlen.o(.text) for strlen
     girouette.o(i.config_gpio_girouette) refers to mytimer.o(i.MyTimer_Conf) for MyTimer_Conf
     girouette.o(i.config_gpio_girouette) refers to mytimer.o(i.MyTimer_Start) for MyTimer_Start
     accelerometre.o(i.MyAccelero_ADC) refers to ffltui.o(.text) for __aeabi_ui2f
@@ -259,12 +257,12 @@ Removing Unused input sections from the image.
     Removing check_battery.o(.rev16_text), (4 bytes).
     Removing check_battery.o(.revsh_text), (4 bytes).
     Removing check_battery.o(.rrx_text), (6 bytes).
-    Removing check_battery.o(i.LL_USART_TransmitData8), (4 bytes).
-    Removing check_battery.o(i.Loop_MyBattery_Is_Low), (52 bytes).
-    Removing check_battery.o(i.MyADC_init_battery), (56 bytes).
-    Removing check_battery.o(i.Usart_Init), (104 bytes).
-    Removing check_battery.o(i.Usart_Transmit_High_Battery), (14 bytes).
-    Removing check_battery.o(i.Usart_Transmit_Low_Battery), (14 bytes).
+    Removing check_battery.o(i.LL_USART_SetBaudRate), (158 bytes).
+    Removing check_battery.o(i.Usart_Init), (164 bytes).
+    Removing check_battery.o(i.battery), (84 bytes).
+    Removing check_battery.o(i.init_battery), (88 bytes).
+    Removing check_battery.o(i.s_char), (48 bytes).
+    Removing check_battery.o(i.send_msg), (28 bytes).
     Removing check_battery.o(.constdata), (35 bytes).
     Removing girouette.o(.rev16_text), (4 bytes).
     Removing girouette.o(.revsh_text), (4 bytes).
@@ -369,7 +367,7 @@ Removing Unused input sections from the image.
     Removing system_stm32f1xx.o(.constdata), (24 bytes).
     Removing startup_stm32f103xb.o(HEAP), (512 bytes).
 
-133 unused section(s) (total 12471 bytes) removed from the image.
+133 unused section(s) (total 12797 bytes) removed from the image.
 
 ==============================================================================
 
@@ -381,30 +379,31 @@ Image Symbol Table
 
     ../Src/main.c                            0x00000000   Number         0  main.o ABSOLUTE
     ../Src/system_stm32f1xx.c                0x00000000   Number         0  system_stm32f1xx.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry2.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11b.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9a.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8b.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8a.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry2.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11b.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry5.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9a.o ABSOLUTE
-    ../clib/microlib/longlong.c              0x00000000   Number         0  llushr.o ABSOLUTE
-    ../clib/microlib/longlong.c              0x00000000   Number         0  llshl.o ABSOLUTE
     ../clib/microlib/longlong.c              0x00000000   Number         0  llsshr.o ABSOLUTE
+    ../clib/microlib/longlong.c              0x00000000   Number         0  llshl.o ABSOLUTE
+    ../clib/microlib/longlong.c              0x00000000   Number         0  llushr.o ABSOLUTE
+    ../clib/microlib/string/strlen.c         0x00000000   Number         0  strlen.o ABSOLUTE
     ../clib/microlib/stubs.s                 0x00000000   Number         0  iusefp.o ABSOLUTE
     ../fplib/microlib/d2f.c                  0x00000000   Number         0  d2f.o ABSOLUTE
     ../fplib/microlib/f2d.c                  0x00000000   Number         0  f2d.o ABSOLUTE
     ../fplib/microlib/fpadd.c                0x00000000   Number         0  dadd.o ABSOLUTE
     ../fplib/microlib/fpdiv.c                0x00000000   Number         0  ddiv.o ABSOLUTE
     ../fplib/microlib/fpdiv.c                0x00000000   Number         0  fdiv.o ABSOLUTE
-    ../fplib/microlib/fpepilogue.c           0x00000000   Number         0  depilogue.o ABSOLUTE
     ../fplib/microlib/fpepilogue.c           0x00000000   Number         0  fepilogue.o ABSOLUTE
+    ../fplib/microlib/fpepilogue.c           0x00000000   Number         0  depilogue.o ABSOLUTE
     ../fplib/microlib/fpfix.c                0x00000000   Number         0  ffixui.o ABSOLUTE
     ../fplib/microlib/fpfix.c                0x00000000   Number         0  ffixi.o ABSOLUTE
     ../fplib/microlib/fpflt.c                0x00000000   Number         0  dflti.o ABSOLUTE
@@ -696,80 +695,80 @@ Memory Map of the image
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x08000000   0x08000000   0x000000ec   Data   RO         1105    RESET               startup_stm32f103xb.o
-    0x080000ec   0x080000ec   0x00000000   Code   RO         1110  * .ARM.Collect$$$$00000000  mc_w.l(entry.o)
-    0x080000ec   0x080000ec   0x00000004   Code   RO         1139    .ARM.Collect$$$$00000001  mc_w.l(entry2.o)
-    0x080000f0   0x080000f0   0x00000004   Code   RO         1142    .ARM.Collect$$$$00000004  mc_w.l(entry5.o)
-    0x080000f4   0x080000f4   0x00000000   Code   RO         1144    .ARM.Collect$$$$00000008  mc_w.l(entry7b.o)
-    0x080000f4   0x080000f4   0x00000000   Code   RO         1146    .ARM.Collect$$$$0000000A  mc_w.l(entry8b.o)
-    0x080000f4   0x080000f4   0x00000008   Code   RO         1147    .ARM.Collect$$$$0000000B  mc_w.l(entry9a.o)
-    0x080000fc   0x080000fc   0x00000000   Code   RO         1149    .ARM.Collect$$$$0000000D  mc_w.l(entry10a.o)
-    0x080000fc   0x080000fc   0x00000000   Code   RO         1151    .ARM.Collect$$$$0000000F  mc_w.l(entry11a.o)
-    0x080000fc   0x080000fc   0x00000004   Code   RO         1140    .ARM.Collect$$$$00002712  mc_w.l(entry2.o)
-    0x08000100   0x08000100   0x00000024   Code   RO         1106    .text               startup_stm32f103xb.o
-    0x08000124   0x08000124   0x00000064   Code   RO         1113    .text               mf_w.l(fmul.o)
-    0x08000188   0x08000188   0x0000007c   Code   RO         1115    .text               mf_w.l(fdiv.o)
-    0x08000204   0x08000204   0x0000014e   Code   RO         1117    .text               mf_w.l(dadd.o)
-    0x08000352   0x08000352   0x000000e4   Code   RO         1119    .text               mf_w.l(dmul.o)
-    0x08000436   0x08000436   0x000000de   Code   RO         1121    .text               mf_w.l(ddiv.o)
-    0x08000514   0x08000514   0x0000000a   Code   RO         1123    .text               mf_w.l(ffltui.o)
-    0x0800051e   0x0800051e   0x00000022   Code   RO         1125    .text               mf_w.l(dflti.o)
-    0x08000540   0x08000540   0x00000032   Code   RO         1127    .text               mf_w.l(ffixi.o)
-    0x08000572   0x08000572   0x00000028   Code   RO         1129    .text               mf_w.l(ffixui.o)
-    0x0800059a   0x0800059a   0x00000026   Code   RO         1131    .text               mf_w.l(f2d.o)
-    0x080005c0   0x080005c0   0x00000030   Code   RO         1133    .text               mf_w.l(cdcmple.o)
-    0x080005f0   0x080005f0   0x00000030   Code   RO         1135    .text               mf_w.l(cdrcmple.o)
-    0x08000620   0x08000620   0x00000038   Code   RO         1137    .text               mf_w.l(d2f.o)
-    0x08000658   0x08000658   0x0000001e   Code   RO         1153    .text               mc_w.l(llshl.o)
-    0x08000676   0x08000676   0x00000024   Code   RO         1155    .text               mc_w.l(llsshr.o)
-    0x0800069a   0x0800069a   0x00000000   Code   RO         1157    .text               mc_w.l(iusefp.o)
-    0x0800069a   0x0800069a   0x0000006e   Code   RO         1158    .text               mf_w.l(fepilogue.o)
-    0x08000708   0x08000708   0x000000ba   Code   RO         1160    .text               mf_w.l(depilogue.o)
+    0x08000000   0x08000000   0x000000ec   Data   RO         1118    RESET               startup_stm32f103xb.o
+    0x080000ec   0x080000ec   0x00000000   Code   RO         1123  * .ARM.Collect$$$$00000000  mc_w.l(entry.o)
+    0x080000ec   0x080000ec   0x00000004   Code   RO         1154    .ARM.Collect$$$$00000001  mc_w.l(entry2.o)
+    0x080000f0   0x080000f0   0x00000004   Code   RO         1157    .ARM.Collect$$$$00000004  mc_w.l(entry5.o)
+    0x080000f4   0x080000f4   0x00000000   Code   RO         1159    .ARM.Collect$$$$00000008  mc_w.l(entry7b.o)
+    0x080000f4   0x080000f4   0x00000000   Code   RO         1161    .ARM.Collect$$$$0000000A  mc_w.l(entry8b.o)
+    0x080000f4   0x080000f4   0x00000008   Code   RO         1162    .ARM.Collect$$$$0000000B  mc_w.l(entry9a.o)
+    0x080000fc   0x080000fc   0x00000000   Code   RO         1164    .ARM.Collect$$$$0000000D  mc_w.l(entry10a.o)
+    0x080000fc   0x080000fc   0x00000000   Code   RO         1166    .ARM.Collect$$$$0000000F  mc_w.l(entry11a.o)
+    0x080000fc   0x080000fc   0x00000004   Code   RO         1155    .ARM.Collect$$$$00002712  mc_w.l(entry2.o)
+    0x08000100   0x08000100   0x00000024   Code   RO         1119    .text               startup_stm32f103xb.o
+    0x08000124   0x08000124   0x00000064   Code   RO         1128    .text               mf_w.l(fmul.o)
+    0x08000188   0x08000188   0x0000007c   Code   RO         1130    .text               mf_w.l(fdiv.o)
+    0x08000204   0x08000204   0x0000014e   Code   RO         1132    .text               mf_w.l(dadd.o)
+    0x08000352   0x08000352   0x000000e4   Code   RO         1134    .text               mf_w.l(dmul.o)
+    0x08000436   0x08000436   0x000000de   Code   RO         1136    .text               mf_w.l(ddiv.o)
+    0x08000514   0x08000514   0x0000000a   Code   RO         1138    .text               mf_w.l(ffltui.o)
+    0x0800051e   0x0800051e   0x00000022   Code   RO         1140    .text               mf_w.l(dflti.o)
+    0x08000540   0x08000540   0x00000032   Code   RO         1142    .text               mf_w.l(ffixi.o)
+    0x08000572   0x08000572   0x00000028   Code   RO         1144    .text               mf_w.l(ffixui.o)
+    0x0800059a   0x0800059a   0x00000026   Code   RO         1146    .text               mf_w.l(f2d.o)
+    0x080005c0   0x080005c0   0x00000030   Code   RO         1148    .text               mf_w.l(cdcmple.o)
+    0x080005f0   0x080005f0   0x00000030   Code   RO         1150    .text               mf_w.l(cdrcmple.o)
+    0x08000620   0x08000620   0x00000038   Code   RO         1152    .text               mf_w.l(d2f.o)
+    0x08000658   0x08000658   0x0000001e   Code   RO         1168    .text               mc_w.l(llshl.o)
+    0x08000676   0x08000676   0x00000024   Code   RO         1170    .text               mc_w.l(llsshr.o)
+    0x0800069a   0x0800069a   0x00000000   Code   RO         1172    .text               mc_w.l(iusefp.o)
+    0x0800069a   0x0800069a   0x0000006e   Code   RO         1173    .text               mf_w.l(fepilogue.o)
+    0x08000708   0x08000708   0x000000ba   Code   RO         1175    .text               mf_w.l(depilogue.o)
     0x080007c2   0x080007c2   0x00000002   PAD
-    0x080007c4   0x080007c4   0x00000024   Code   RO         1162    .text               mc_w.l(init.o)
-    0x080007e8   0x080007e8   0x00000020   Code   RO         1164    .text               mc_w.l(llushr.o)
-    0x08000808   0x08000808   0x00000114   Code   RO          515    i.CC                cc.o
+    0x080007c4   0x080007c4   0x00000024   Code   RO         1177    .text               mc_w.l(init.o)
+    0x080007e8   0x080007e8   0x00000020   Code   RO         1179    .text               mc_w.l(llushr.o)
+    0x08000808   0x08000808   0x00000114   Code   RO          528    i.CC                cc.o
     0x0800091c   0x0800091c   0x0000001c   Code   RO          173    i.LL_APB1_GRP1_EnableClock  mytimer.o
-    0x08000938   0x08000938   0x0000002c   Code   RO          516    i.LL_GPIO_SetPinMode  cc.o
-    0x08000964   0x08000964   0x0000001c   Code   RO          517    i.LL_GPIO_SetPinPull  cc.o
-    0x08000980   0x08000980   0x0000001c   Code   RO          656    i.LL_Init1msTick    stm32f1xx_ll_utils.o
-    0x0800099c   0x0800099c   0x0000000c   Code   RO          663    i.LL_SetSystemCoreClock  stm32f1xx_ll_utils.o
+    0x08000938   0x08000938   0x0000002c   Code   RO          529    i.LL_GPIO_SetPinMode  cc.o
+    0x08000964   0x08000964   0x0000001c   Code   RO          530    i.LL_GPIO_SetPinPull  cc.o
+    0x08000980   0x08000980   0x0000001c   Code   RO          669    i.LL_Init1msTick    stm32f1xx_ll_utils.o
+    0x0800099c   0x0800099c   0x0000000c   Code   RO          676    i.LL_SetSystemCoreClock  stm32f1xx_ll_utils.o
     0x080009a8   0x080009a8   0x00000008   Code   RO          174    i.LL_TIM_ClearFlag_UPDATE  mytimer.o
     0x080009b0   0x080009b0   0x0000000a   Code   RO          175    i.LL_TIM_DisableCounter  mytimer.o
     0x080009ba   0x080009ba   0x0000000a   Code   RO          176    i.LL_TIM_DisableIT_UPDATE  mytimer.o
-    0x080009c4   0x080009c4   0x00000114   Code   RO          768    i.LL_TIM_Init       stm32f1xx_ll_tim.o
-    0x08000ad8   0x08000ad8   0x00000004   Code   RO          459    i.LL_TIM_OC_SetCompareCH1  servovoile.o
-    0x08000adc   0x08000adc   0x00000004   Code   RO          518    i.LL_TIM_OC_SetCompareCH2  cc.o
-    0x08000ae0   0x08000ae0   0x0000006c   Code   RO          460    i.LL_TIM_OC_SetMode  servovoile.o
-    0x08000b4c   0x08000b4c   0x0000006c   Code   RO          519    i.LL_TIM_OC_SetMode  cc.o
-    0x08000bb8   0x08000bb8   0x000000d8   Code   RO          417    i.Loop_Pwm          telecommande.o
-    0x08000c90   0x08000c90   0x0000003c   Code   RO          382    i.MyADC_init_accelero  accelerometre.o
-    0x08000ccc   0x08000ccc   0x00000014   Code   RO          383    i.MyAccelero_ADC    accelerometre.o
+    0x080009c4   0x080009c4   0x00000114   Code   RO          781    i.LL_TIM_Init       stm32f1xx_ll_tim.o
+    0x08000ad8   0x08000ad8   0x00000004   Code   RO          472    i.LL_TIM_OC_SetCompareCH1  servovoile.o
+    0x08000adc   0x08000adc   0x00000004   Code   RO          531    i.LL_TIM_OC_SetCompareCH2  cc.o
+    0x08000ae0   0x08000ae0   0x0000006c   Code   RO          473    i.LL_TIM_OC_SetMode  servovoile.o
+    0x08000b4c   0x08000b4c   0x0000006c   Code   RO          532    i.LL_TIM_OC_SetMode  cc.o
+    0x08000bb8   0x08000bb8   0x000000d8   Code   RO          430    i.Loop_Pwm          telecommande.o
+    0x08000c90   0x08000c90   0x0000003c   Code   RO          395    i.MyADC_init_accelero  accelerometre.o
+    0x08000ccc   0x08000ccc   0x00000014   Code   RO          396    i.MyAccelero_ADC    accelerometre.o
     0x08000ce0   0x08000ce0   0x00000084   Code   RO          177    i.MyTimer_Conf      mytimer.o
-    0x08000d64   0x08000d64   0x000001a0   Code   RO          418    i.MyTimer_PWM_Init_Input  telecommande.o
+    0x08000d64   0x08000d64   0x000001a0   Code   RO          431    i.MyTimer_PWM_Init_Input  telecommande.o
     0x08000f04   0x08000f04   0x0000000e   Code   RO          182    i.MyTimer_Start     mytimer.o
     0x08000f12   0x08000f12   0x00000002   PAD
-    0x08000f14   0x08000f14   0x000000e8   Code   RO          520    i.Pwm_Configure_CC  cc.o
-    0x08000ffc   0x08000ffc   0x00000108   Code   RO          461    i.Pwm_Configure_Servoile  servovoile.o
-    0x08001104   0x08001104   0x00000028   Code   RO          419    i.Raw_Pwm           telecommande.o
+    0x08000f14   0x08000f14   0x000000e8   Code   RO          533    i.Pwm_Configure_CC  cc.o
+    0x08000ffc   0x08000ffc   0x00000108   Code   RO          474    i.Pwm_Configure_Servoile  servovoile.o
+    0x08001104   0x08001104   0x00000028   Code   RO          432    i.Raw_Pwm           telecommande.o
     0x0800112c   0x0800112c   0x000000e0   Code   RO            4    i.SystemClock_Config  main.o
-    0x0800120c   0x0800120c   0x00000058   Code   RO         1070    i.SystemInit        system_stm32f1xx.o
+    0x0800120c   0x0800120c   0x00000058   Code   RO         1083    i.SystemInit        system_stm32f1xx.o
     0x08001264   0x08001264   0x00000018   Code   RO          184    i.TIM1_UP_IRQHandler  mytimer.o
     0x0800127c   0x0800127c   0x00000018   Code   RO          185    i.TIM2_IRQHandler   mytimer.o
     0x08001294   0x08001294   0x00000018   Code   RO          186    i.TIM3_IRQHandler   mytimer.o
     0x080012ac   0x080012ac   0x00000018   Code   RO          187    i.TIM4_IRQHandler   mytimer.o
-    0x080012c4   0x080012c4   0x0000000e   Code   RO         1168    i.__scatterload_copy  mc_w.l(handlers.o)
-    0x080012d2   0x080012d2   0x00000002   Code   RO         1169    i.__scatterload_null  mc_w.l(handlers.o)
-    0x080012d4   0x080012d4   0x0000000e   Code   RO         1170    i.__scatterload_zeroinit  mc_w.l(handlers.o)
+    0x080012c4   0x080012c4   0x0000000e   Code   RO         1183    i.__scatterload_copy  mc_w.l(handlers.o)
+    0x080012d2   0x080012d2   0x00000002   Code   RO         1184    i.__scatterload_null  mc_w.l(handlers.o)
+    0x080012d4   0x080012d4   0x0000000e   Code   RO         1185    i.__scatterload_zeroinit  mc_w.l(handlers.o)
     0x080012e2   0x080012e2   0x00000004   Code   RO            5    i.assert_failed     main.o
     0x080012e6   0x080012e6   0x00000002   PAD
-    0x080012e8   0x080012e8   0x00000060   Code   RO          355    i.config_gpio_girouette  girouette.o
+    0x080012e8   0x080012e8   0x00000060   Code   RO          368    i.config_gpio_girouette  girouette.o
     0x08001348   0x08001348   0x00000050   Code   RO            6    i.main              main.o
-    0x08001398   0x08001398   0x0000011c   Code   RO          462    i.servo_voile       servovoile.o
-    0x080014b4   0x080014b4   0x00000023   Data   RO          463    .constdata          servovoile.o
-    0x080014d7   0x080014d7   0x00000023   Data   RO          521    .constdata          cc.o
+    0x08001398   0x08001398   0x0000011c   Code   RO          475    i.servo_voile       servovoile.o
+    0x080014b4   0x080014b4   0x00000023   Data   RO          476    .constdata          servovoile.o
+    0x080014d7   0x080014d7   0x00000023   Data   RO          534    .constdata          cc.o
     0x080014fa   0x080014fa   0x00000002   PAD
-    0x080014fc   0x080014fc   0x00000020   Data   RO         1166    Region$$Table       anon$$obj.o
+    0x080014fc   0x080014fc   0x00000020   Data   RO         1181    Region$$Table       anon$$obj.o
 
 
     Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x0800151c, Size: 0x00000428, Max: 0x00005000, ABSOLUTE)
@@ -777,10 +776,10 @@ Memory Map of the image
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
     0x20000000   0x0800151c   0x00000010   Data   RW          189    .data               mytimer.o
-    0x20000010   0x0800152c   0x00000004   Data   RW          420    .data               telecommande.o
-    0x20000014   0x08001530   0x00000010   Data   RW          464    .data               servovoile.o
-    0x20000024   0x08001540   0x00000004   Data   RW         1072    .data               system_stm32f1xx.o
-    0x20000028        -       0x00000400   Zero   RW         1103    STACK               startup_stm32f103xb.o
+    0x20000010   0x0800152c   0x00000004   Data   RW          433    .data               telecommande.o
+    0x20000014   0x08001530   0x00000010   Data   RW          477    .data               servovoile.o
+    0x20000024   0x08001540   0x00000004   Data   RW         1085    .data               system_stm32f1xx.o
+    0x20000028        -       0x00000400   Zero   RW         1116    STACK               startup_stm32f103xb.o
 
 
 ==============================================================================
@@ -792,11 +791,10 @@ Image component sizes
 
         80          8          0          0          0      10147   accelerometre.o
        692         70         35          0          0      38132   cc.o
-         0          0          0          0          0       2508   check_battery.o
         96         14          0          0          0       8420   girouette.o
        308         26          0          0          0     356180   main.o
        298         48          0         16          0      32144   mytimer.o
-       660         80         35         16          0      35112   servovoile.o
+       660         80         35         16          0      37620   servovoile.o
         36          8        236          0       1024        760   startup_stm32f103xb.o
        276         48          0          0          0      28934   stm32f1xx_ll_tim.o
         40          6          0          0          0       2037   stm32f1xx_ll_utils.o

@@ -14,3 +14,7 @@ nucleo-f103rb\check_battery.o: ..\LLDrivers\inc\stm32f1xx_ll_tim.h
 nucleo-f103rb\check_battery.o: ..\LLDrivers\inc\stm32f1xx_ll_bus.h
 nucleo-f103rb\check_battery.o: ..\LLDrivers\inc\stm32f1xx_ll_gpio.h
 nucleo-f103rb\check_battery.o: ..\LLDrivers\inc\stm32f1xx_ll_rcc.h
+nucleo-f103rb\check_battery.o: ..\LLDrivers\inc\stm32f1xx_ll_adc.h
+nucleo-f103rb\check_battery.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+nucleo-f103rb\check_battery.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+nucleo-f103rb\check_battery.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

@@ -3,7 +3,7 @@
 void CC(float rate)
 {
 	//rq: PA2 est aussi TIM2_CH3 (ne pas s'inquieter si TIM_CH3 s'allume)
-			//max 60% moteur (*0.6)
+			//max 90% moteur (*0.9)
 	//marge 0.005 au centre
 	if(rate <0.070)
 	{LL_GPIO_SetPinPull(GPIOA,LL_GPIO_PIN_2,LL_GPIO_PULL_UP);
