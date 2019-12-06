@@ -50,6 +50,7 @@ int main(void)
 	
 	accelero_droit= MyAccelero_ADC();
   config_gpio_girouette();// attention faire un tour de girouette pour avancer dans le code !
+	position_centrale_telecommande=Raw_Pwm();
 	/* Infinite loop */
   while (1)
   {

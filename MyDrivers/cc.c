@@ -7,13 +7,13 @@ void CC(float rate)
 	//marge 0.005 au centre
 	if(rate <0.070)
 	{LL_GPIO_SetPinPull(GPIOA,LL_GPIO_PIN_2,LL_GPIO_PULL_UP);
-		rate=(rate*0.6)/0.070;
+		rate=(rate*0.9)/0.070;
 	}
 	else if( rate >0.080){
 		LL_GPIO_SetPinPull(GPIOA,LL_GPIO_PIN_2,LL_GPIO_PULL_DOWN);
-	rate=(rate*0.6)/0.1;
+	rate=(rate*0.9)/0.1;
 	}
-	if(rate>=0.070 && rate<=0.080)
+	if(rate>=0.072 && rate<=0.078)
 		LL_TIM_OC_SetCompareCH2(TIM2,0); 
 	else{
 

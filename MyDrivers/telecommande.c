@@ -1,6 +1,6 @@
 #include "telecommande.h"
 #include "MyTimer.h"
-
+float position_centrale_telecommande;
 float Loop_Pwm(void) {
 		//extraire angle	
 		 float duree_imp=TIM4->CCR2;
@@ -8,13 +8,19 @@ float Loop_Pwm(void) {
 		 float ratio=duree_imp/period; 
 	
 	//position neutre si télécommande au milieu, absence de signal ou valeur aberrante
-	//ratio entre  0.050 et 0.1 en normal
+	//ratio entre  0.060 et 0.09 en normal
 	//ne tourne pas 
-			if ((ratio > 0.070 && ratio <0.080) || (ratio <0.040) || (ratio >0.11)) {
+		ratio=(ratio*0.075)/(position_centrale_telecommande);
+			if ((ratio > 0.072 && ratio <0.078) || (ratio <0.040) || (ratio >0.11)) {
 			ratio = 0.075;
 		}
 		return ratio ;
 	
+}
+float Raw_Pwm(void){
+			float duree_imp=TIM4->CCR2;
+		 float period = TIM4->CCR1 ;
+		 return duree_imp/period; 
 }
 
 //Paramétrer TIM4 Ch1 en PWM input
